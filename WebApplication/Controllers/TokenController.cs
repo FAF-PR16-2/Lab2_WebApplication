@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 using WebApplication.Models;
 
 namespace WebApplication.Controllers
@@ -9,9 +10,12 @@ namespace WebApplication.Controllers
     public class TokenController : ControllerBase
     {
         private readonly IJwtTokenManager _tokenManager;
-        
-        public TokenController(IJwtTokenManager jwtTokenManager)
+        private IMongoCollection<User> _usersCollection;
+
+        public TokenController(IJwtTokenManager jwtTokenManager, IMongoClient client)
         {
+            var database = client.GetDatabase("lab2_db");
+            _usersCollection = database.GetCollection<User>("users");
                 _tokenManager = jwtTokenManager;
         }
         

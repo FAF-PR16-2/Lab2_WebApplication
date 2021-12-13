@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Driver;
 
 namespace WebApplication
 {
@@ -36,7 +37,7 @@ namespace WebApplication
             {
                 var key = Configuration.GetValue<string>("JwtConfig:Key");
                 var keyBytes = Encoding.ASCII.GetBytes(key);
-                jwtOptions.SaveToken = true;
+                jwtOptions.SaveToken = false;
                 jwtOptions.TokenValidationParameters = new TokenValidationParameters
                 {
                     IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
@@ -47,6 +48,11 @@ namespace WebApplication
             });
 
             services.AddSingleton(typeof(IJwtTokenManager), typeof(JwtTokenManager));
+            services.AddSingleton<IMongoClient>(s =>
+            {
+                var uri = s.GetRequiredService<IConfiguration>()["MongoUri"];
+                return new MongoClient("");
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
