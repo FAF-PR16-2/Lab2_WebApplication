@@ -53,6 +53,7 @@ namespace WebApplication
                 var uri = s.GetRequiredService<IConfiguration>()["MongoUri"];
                 return new MongoClient("");
             });
+            services.AddSingleton(typeof(IPasswordHasher), typeof(PasswordHasher));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

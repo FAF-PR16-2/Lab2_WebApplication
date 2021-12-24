@@ -11,15 +11,17 @@ namespace WebApplication
     public class JwtTokenManager : IJwtTokenManager
     {
         private readonly IConfiguration _configuration;
+        private readonly IPasswordHasher _passwordHasher;
         
-        public JwtTokenManager(IConfiguration configuration)
+        public JwtTokenManager(IConfiguration configuration, IPasswordHasher passwordHasher)
         {
             _configuration = configuration;
+            _passwordHasher = passwordHasher;
         }
         
         public string Authenticate(string userName, string password)
         {
-            if (!Data.Users.Any(x => x.Key.Equals(userName) && x.Value.Equals(password)))
+            if (!Data.Users.Any(x => x.Key.Equals(userName) && _passwordHasher.VerifyPassword(password, x.Value))) //.Equals(password)))
                 return null;
 
             var key = _configuration.GetValue<string>("JwtConfig:Key");
@@ -39,6 +41,14 @@ namespace WebApplication
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+
+        public string SignUp(string userName, string password)
+        {
+            if (Data.Users.Any(x => x.Key.Equals(userName))) //&& _passwordHasher.VerifyPassword(password, x.Value))) //.Equals(password)))
+                return null;
+            
+            
         }
     }
 }
