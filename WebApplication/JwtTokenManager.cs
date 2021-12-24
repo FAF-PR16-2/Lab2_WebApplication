@@ -19,11 +19,8 @@ namespace WebApplication
             _passwordHasher = passwordHasher;
         }
         
-        public string Authenticate(string userName, string password)
+        public string Authenticate(string userName)//, string password)
         {
-            if (!Data.Users.Any(x => x.Key.Equals(userName) && _passwordHasher.VerifyPassword(password, x.Value))) //.Equals(password)))
-                return null;
-
             var key = _configuration.GetValue<string>("JwtConfig:Key");
             var keyBytes = Encoding.ASCII.GetBytes(key);
 
@@ -41,14 +38,6 @@ namespace WebApplication
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
-        }
-
-        public string SignUp(string userName, string password)
-        {
-            if (Data.Users.Any(x => x.Key.Equals(userName))) //&& _passwordHasher.VerifyPassword(password, x.Value))) //.Equals(password)))
-                return null;
-            
-            
         }
     }
 }

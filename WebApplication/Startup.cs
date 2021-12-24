@@ -51,7 +51,7 @@ namespace WebApplication
             services.AddSingleton<IMongoClient>(s =>
             {
                 var uri = s.GetRequiredService<IConfiguration>()["MongoUri"];
-                return new MongoClient("");
+                return new MongoClient(uri);
             });
             services.AddSingleton(typeof(IPasswordHasher), typeof(PasswordHasher));
         }

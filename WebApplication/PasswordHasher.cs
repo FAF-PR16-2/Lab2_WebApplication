@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 namespace WebApplication
 {
-    public class PasswordHasher
+    public class PasswordHasher : IPasswordHasher
     {
         public string HashString(string password)
         {
