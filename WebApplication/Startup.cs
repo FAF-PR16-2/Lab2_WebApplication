@@ -7,11 +7,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
+
+
 
 namespace WebApplication
 {
@@ -37,7 +40,7 @@ namespace WebApplication
             {
                 var key = Configuration.GetValue<string>("JwtConfig:Key");
                 var keyBytes = Encoding.ASCII.GetBytes(key);
-                jwtOptions.SaveToken = false;
+                jwtOptions.SaveToken = true;
                 jwtOptions.TokenValidationParameters = new TokenValidationParameters
                 {
                     IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
@@ -54,6 +57,9 @@ namespace WebApplication
                 return new MongoClient(uri);
             });
             services.AddSingleton(typeof(IPasswordHasher), typeof(PasswordHasher));
+            
+            
+            //services.AddSingleton(typeof(IUserManager), typeof(UserManager));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

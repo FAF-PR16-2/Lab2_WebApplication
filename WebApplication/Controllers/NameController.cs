@@ -1,7 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 
 namespace WebApplication.Controllers
 {
@@ -11,10 +18,11 @@ namespace WebApplication.Controllers
     public class NameController : ControllerBase
     {
         [HttpGet("GetNames")]
-        public IActionResult GetNames()
+        public ActionResult<string> GetNames()
         {
-            var token = HttpContext.GetTokenAsync("access_token").Result;
-            return Ok(new List<string> { "Adam", "Robert" });
+            var userId = Request.HttpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+            
+            return Ok(userId);
         }
     }
 }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using WebApplication.Models;
 
@@ -12,8 +14,8 @@ namespace WebApplication.Controllers
     public class TokenController : ControllerBase
     {
         private readonly IJwtTokenManager _tokenManager;
-        private IMongoCollection<User> _usersCollection;
-        private IPasswordHasher _passwordHasher;
+        private readonly IMongoCollection<User> _usersCollection;
+        private readonly IPasswordHasher _passwordHasher;
         
 
         public TokenController(IJwtTokenManager jwtTokenManager, IPasswordHasher passwordHasher, IMongoClient client)
@@ -22,14 +24,13 @@ namespace WebApplication.Controllers
             _usersCollection = database.GetCollection<User>("users");
             _tokenManager = jwtTokenManager;
             _passwordHasher = passwordHasher;
-
         }
         
         [AllowAnonymous]
-        [HttpPost("sign-on")]
+        [HttpPost("sign-in")]
         public IActionResult Authenticate([FromBody] UserCredential credential)
         {
-            if (CheckIfAccountExists(credential.UserName, credential.Password))
+            if (!CheckIfAccountExists(credential.UserName, credential.Password))
                 return Unauthorized();
             var token = _tokenManager.Authenticate(credential.UserName);//, credential.Password);
             if (string.IsNullOrEmpty(token))
@@ -41,6 +42,8 @@ namespace WebApplication.Controllers
         [HttpPost("sign-up")]
         public IActionResult SignUp([FromBody] UserCredential credential)
         {
+            
+            
             if (CheckIfNameOrEmailIsFree(credential.UserName, credential.Email) != UsernameStatus.Free)
                 return Unauthorized();
             var token = _tokenManager.Authenticate(credential.UserName);//, credential.Password);
@@ -85,18 +88,16 @@ namespace WebApplication.Controllers
 
         private bool CheckIfAccountExists(string userName, string password)
         {
-            List<User> users = 
-                _usersCollection.Find(user => user.UserName == userName
-                                              && _passwordHasher.VerifyPassword(password, user.Password))
-                .ToList();
-
+            var users = 
+                _usersCollection.Find(user => user.UserName == userName).ToList();
+            
             if (users.Count < 1)
                 return false;
             
             if (users.Count > 1)
                 Console.WriteLine("wtf?");
 
-            return true;
+            return _passwordHasher.VerifyPassword(password, users[0].Password);
         }
             
     }

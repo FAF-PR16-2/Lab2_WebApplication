@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Bson;
 
 namespace WebApplication
 {
@@ -12,7 +13,8 @@ namespace WebApplication
     {
         private readonly IConfiguration _configuration;
         private readonly IPasswordHasher _passwordHasher;
-        
+        private readonly JwtSecurityTokenHandler _jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+
         public JwtTokenManager(IConfiguration configuration, IPasswordHasher passwordHasher)
         {
             _configuration = configuration;
@@ -24,7 +26,7 @@ namespace WebApplication
             var key = _configuration.GetValue<string>("JwtConfig:Key");
             var keyBytes = Encoding.ASCII.GetBytes(key);
 
-            var tokenHandler = new JwtSecurityTokenHandler();
+            //var tokenHandler = new JwtSecurityTokenHandler();
 
             var tokenDescriptor = new SecurityTokenDescriptor()
             {
@@ -36,8 +38,16 @@ namespace WebApplication
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature)
             };
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            var token = _jwtSecurityTokenHandler.CreateToken(tokenDescriptor);
+            return _jwtSecurityTokenHandler.WriteToken(token);
+        }
+
+        public string GetUsernameFromToken(string token)
+        {
+            var securityToken = _jwtSecurityTokenHandler.ReadToken(token);
+
+            return securityToken.ToJson();
+            
         }
     }
 }
