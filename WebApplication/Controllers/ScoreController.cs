@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -32,19 +33,21 @@ namespace WebApplication.Controllers
         [HttpPost("score")]
         public IActionResult SetPlayerScore([FromBody] ScoreInfo scoreInfo)
         {
-            var token = (User as ClaimsPrincipal).FindFirst("access_token").Value;
+            var username = Request.HttpContext.User.Claims.FirstOrDefault(x => 
+                x.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            List<User> users = _usersCollection.Find(user => user.UserName == username)
+                .ToList();
             
-            Console.WriteLine(token);
-            Console.WriteLine("...");
             
-            // Score newScore = new Score
-            // {
-            //     UserId = _userManager.CurrentUser.Id,
-            //     nickName = scoreInfo.NickName,
-            //     score = scoreInfo.Score
-            // };
-            //
-            // _scoresCollection.InsertOne(newScore);
+            Score newScore = new Score
+            {
+                UserId = users[0].Id,
+                nickName = scoreInfo.NickName,
+                score = scoreInfo.Score
+            };
+            
+            _scoresCollection.InsertOne(newScore);
 
             return Ok();
         }

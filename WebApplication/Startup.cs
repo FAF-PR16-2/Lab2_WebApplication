@@ -57,6 +57,7 @@ namespace WebApplication
                 return new MongoClient(uri);
             });
             services.AddSingleton(typeof(IPasswordHasher), typeof(PasswordHasher));
+            services.AddSingleton(typeof(IEmailSender), typeof(EmailSender));
             
             
             //services.AddSingleton(typeof(IUserManager), typeof(UserManager));

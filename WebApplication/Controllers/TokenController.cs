@@ -16,14 +16,16 @@ namespace WebApplication.Controllers
         private readonly IJwtTokenManager _tokenManager;
         private readonly IMongoCollection<User> _usersCollection;
         private readonly IPasswordHasher _passwordHasher;
+        private readonly IEmailSender _emailSender;
         
 
-        public TokenController(IJwtTokenManager jwtTokenManager, IPasswordHasher passwordHasher, IMongoClient client)
+        public TokenController(IJwtTokenManager jwtTokenManager, IPasswordHasher passwordHasher, IMongoClient client, IEmailSender emailSender)
         {
             var database = client.GetDatabase("applicationDB");
             _usersCollection = database.GetCollection<User>("users");
             _tokenManager = jwtTokenManager;
             _passwordHasher = passwordHasher;
+            _emailSender = emailSender;
         }
         
         [AllowAnonymous]
@@ -58,6 +60,8 @@ namespace WebApplication.Controllers
             };
 
             _usersCollection.InsertOne(newDBUser);
+            
+            _emailSender.SendGreetingsEmail(credential.Email);
             
             return Ok(token);
         }
