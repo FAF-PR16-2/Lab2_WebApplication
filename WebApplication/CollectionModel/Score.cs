@@ -8,7 +8,7 @@ namespace WebApplication
         [BsonId] public ObjectId Id { get; set; }
         public ObjectId UserId { get; set; }
         
-        public string nickName { get; set; }
+        //public string nickName { get; set; }
         public string score { get; set; }
     }
 }
